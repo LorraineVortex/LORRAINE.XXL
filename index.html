@@ -1,0 +1,631 @@
+﻿﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EchoLand - 湖北非遗民族民间舞蹈数字资产库</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: #0f0e0e;
+  color: #f0e6d2;
+  overflow-x: hidden;
+}
+
+.nav-top {
+  position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 100;
+  background: rgba(15,14,14,0.85);
+  border-bottom: 1px solid rgba(201,169,110,0.25);
+  backdrop-filter: blur(6px);
+}
+.logo-text { font-size: 18px; font-weight: 700; color: #c9a96e; letter-spacing: 2px; }
+.nav-links { display: flex; gap: 20px; }
+.nav-links a {
+  color: #d4c5a9; text-decoration: none; font-size: 14px;
+  padding: 6px 10px; border-radius: 4px; transition: all .2s;
+  border: 1px solid transparent;
+}
+.nav-links a:hover, .nav-links a.active {
+  color: #c9a96e; border-color: rgba(201,169,110,0.5); background: rgba(201,169,110,0.08);
+}
+
+.page {
+  display: none; min-height: 100vh; padding-top: 72px; padding-bottom: 40px;
+}
+.page.active { display: block; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+#home {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100vh; text-align: center; padding-top: 0;
+  position: fixed; inset: 0;
+  background: url("背景.png") center/cover no-repeat;
+}
+#home::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.65);
+}
+#home > * { position: relative; z-index: 1; }
+#home:not(.active) { display: none; }
+.home-logo {
+  font-size: 64px; font-weight: 800; color: #c9a96e;
+  letter-spacing: 8px; text-shadow: 0 0 30px rgba(201,169,110,0.35);
+  margin-bottom: 40px;
+}
+.enter-button {
+  display: inline-block; padding: 14px 48px; font-size: 20px;
+  color: #c9a96e; border: 2px solid #c9a96e; border-radius: 8px;
+  cursor: pointer; background: rgba(201,169,110,0.08);
+  letter-spacing: 6px; transition: all .3s;
+}
+.enter-button:hover {
+  background: rgba(201,169,110,0.2); box-shadow: 0 0 20px rgba(201,169,110,0.25);
+}
+
+.butterfly {
+  position: fixed; width: 24px; height: 24px; pointer-events: none; z-index: 200;
+  background: radial-gradient(circle, #f3d485 0%, #c9a96e 60%, transparent 80%);
+  border-radius: 50%; opacity: 0.9;
+  animation: flyUp 2s ease-out forwards;
+}
+@keyframes flyUp {
+  0% { transform: translate(0,0) scale(1); opacity: 0.9; }
+  100% { transform: translate(var(--tx), -80vh) scale(0.3); opacity: 0; }
+}
+
+.page-title {
+  font-size: 28px; color: #c9a96e; text-align: center; margin: 16px 0 24px;
+  font-weight: 700; letter-spacing: 3px;
+}
+
+.search-box {
+  display: flex; justify-content: center; margin-bottom: 20px;
+}
+.search-box input {
+  width: 100%; max-width: 560px; padding: 12px 18px; font-size: 14px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(201,169,110,0.35);
+  border-radius: 8px; color: #f0e6d2; outline: none;
+}
+.search-box input::placeholder { color: rgba(240,230,210,0.45); }
+
+.filter-panel {
+  border: 1px solid rgba(201,169,110,0.3); border-radius: 12px;
+  background: rgba(255,255,255,0.03); padding: 20px; margin-bottom: 24px;
+}
+.filter-title {
+  font-size: 18px; color: #c9a96e; margin-bottom: 16px; text-align: center; letter-spacing: 2px;
+}
+.filter-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;
+}
+.filter-col label {
+  display: block; font-size: 13px; color: rgba(240,230,210,0.7); margin-bottom: 6px;
+}
+.filter-col select {
+  width: 100%; padding: 10px 12px; font-size: 14px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(201,169,110,0.35);
+  border-radius: 6px; color: #f0e6d2; outline: none;
+}
+.filter-col select option { background: #1a1616; color: #f0e6d2; }
+.filter-actions { display: flex; justify-content: flex-end; }
+.btn-primary {
+  padding: 10px 28px; font-size: 14px; color: #0f0e0e; background: #c9a96e;
+  border: none; border-radius: 6px; cursor: pointer; letter-spacing: 2px;
+  transition: transform .15s, box-shadow .2s;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(201,169,110,0.25); }
+
+.video-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;
+}
+.video-card {
+  border: 1px solid rgba(201,169,110,0.25); border-radius: 10px;
+  background: rgba(255,255,255,0.03); overflow: hidden; text-align: center;
+  transition: border-color .2s;
+}
+.video-card.active { border-color: #c9a96e; box-shadow: 0 0 16px rgba(201,169,110,0.2); }
+.video-card video { width: 100%; height: 160px; object-fit: cover; display: block; background: #000; }
+.video-card .vname { padding: 10px; font-size: 13px; color: #d4c5a9; }
+
+.bottom-bar {
+  display: flex; justify-content: flex-start; gap: 12px; align-items: center;
+  margin-top: 12px;
+}
+.bottom-bar.center {
+  justify-content: center;
+}
+.bottom-bar.right {
+  justify-content: flex-end;
+}
+.btn-ghost {
+  padding: 10px 20px; font-size: 13px; color: #c9a96e;
+  background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.4);
+  border-radius: 6px; cursor: pointer; letter-spacing: 1px;
+}
+.btn-ghost:hover { background: rgba(201,169,110,0.15); }
+
+/* 暂停按钮 - 小圆形 */
+.pause-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(201,169,110,0.15); border: 1px solid rgba(201,169,110,0.5);
+  cursor: pointer; display: none; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.pause-btn.show { display: flex; }
+.pause-btn:hover { background: rgba(201,169,110,0.25); }
+.pause-btn::before {
+  content: "";
+  width: 0; height: 0;
+  border-left: 8px solid #c9a96e;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  margin-left: 2px;
+}
+
+.video-overlay {
+  position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.92);
+  display: none; align-items: center; justify-content: center;
+}
+.video-overlay.show { display: flex; }
+.video-overlay video { max-width: 90vw; max-height: 80vh; border-radius: 8px; }
+.close-overlay {
+  position: absolute; top: 20px; right: 24px; font-size: 28px; color: #c9a96e;
+  cursor: pointer; background: none; border: none;
+}
+
+.progress-overlay {
+  position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,0.9);
+  display: none; align-items: center; justify-content: center; flex-direction: column;
+}
+.progress-overlay.show { display: flex; }
+.progress-bar-wrap { width: 320px; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin: 12px 0; }
+.progress-bar { height: 100%; width: 0%; background: #c9a96e; transition: width 0.2s linear; }
+
+.empty-state { text-align: center; color: rgba(240,230,210,0.5); padding: 80px 20px; }
+
+.selected-strip {
+  display: flex; gap: 16px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;
+}
+.selected-strip .video-card { width: 220px; }
+
+.avatar-section {
+  border: 1px dashed rgba(201,169,110,0.35); border-radius: 10px;
+  padding: 20px; text-align: center; margin-bottom: 20px;
+}
+.avatar-section img { max-width: 180px; border-radius: 8px; margin-bottom: 10px; }
+
+.back-bar { margin-top: 20px; display: flex; justify-content: center; }
+
+.page:not(#home) {
+  background: radial-gradient(circle at 50% 30%, #2a1b1b 0%, #0f0e0e 70%);
+}
+
+@media (max-width: 768px) {
+  .video-grid { grid-template-columns: repeat(2, 1fr); }
+  .filter-row { grid-template-columns: 1fr; }
+  .home-logo { font-size: 40px; }
+}
+</style>
+</head>
+<body>
+<nav class="nav-top">
+  <div class="logo-text">EchoLand</div>
+  <div class="nav-links">
+    <a href="#" data-page="home" class="active">首页</a>
+    <a href="#" data-page="assets">数字资产库</a>
+    <a href="#" data-page="skin">数字人皮肤</a>
+    <a href="#" data-page="creative">创意舞动</a>
+    <a href="#" data-page="profile">我的</a>
+  </div>
+</nav>
+
+<div class="video-overlay" id="videoOverlay">
+  <button class="close-overlay" onclick="closeOverlay()">✕</button>
+  <video id="overlayVideo" controls playsinline></video>
+</div>
+
+<div class="progress-overlay" id="progressOverlay">
+  <div style="font-size:18px; color:#c9a96e; margin-bottom:8px;">正在编创</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div id="progressText" style="color:#d4c5a9; font-size:14px;">0%</div>
+</div>
+
+<section class="page active" id="home">
+  <div class="home-logo">EchoLand</div>
+  <div class="enter-button" id="enterBtn">ENTER</div>
+</section>
+
+<section class="page" id="assets">
+  <div class="container">
+    <div class="page-title">湖北非遗民族民间舞蹈数字资产库</div>
+    <div class="search-box">
+      <input type="text" placeholder="舞蹈类别名称、文化、动作等关键词">
+    </div>
+    <div class="filter-panel">
+      <div class="filter-title">筛选内容</div>
+      <div class="filter-row">
+        <div class="filter-col">
+          <label>舞蹈类别名称</label>
+          <select id="filterType">
+            <option value="">请选择</option>
+            <option value="摆手舞">摆手舞</option>
+            <option value="肉连响">肉连响</option>
+            <option value="撒叶儿嗬">撒叶儿嗬</option>
+            <option value="八宝铜铃舞">八宝铜铃舞</option>
+            <option value="耍耍">耍耍</option>
+          </select>
+        </div>
+        <div class="filter-col">
+          <label>舞蹈主题</label>
+          <select id="filterTheme">
+            <option value="">请选择</option>
+            <option value="欢庆典礼">欢庆典礼</option>
+            <option value="劳作">劳作</option>
+            <option value="祭祀">祭祀</option>
+            <option value="礼仪">礼仪</option>
+            <option value="情绪">情绪</option>
+          </select>
+        </div>
+        <div class="filter-col">
+          <label>动作分类</label>
+          <select id="filterAction">
+            <option value="">请选择</option>
+            <option value="传统套式动作">传统套式动作</option>
+            <option value="提炼加工动作">提炼加工动作</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn-primary" id="confirmBtn">确定</button>
+      </div>
+    </div>
+
+    <div class="video-grid" id="videoGrid" style="display:none;">
+      <div class="video-card" data-index="0"><video src="动作1.mp4" muted playsinline></video><div class="vname">动作1</div></div>
+      <div class="video-card" data-index="1"><video src="动作2.mp4" muted playsinline></video><div class="vname">动作2</div></div>
+      <div class="video-card" data-index="2"><video src="动作3.mp4" muted playsinline></video><div class="vname">动作3</div></div>
+      <div class="video-card" data-index="3"><video src="动作4.mp4" muted playsinline></video><div class="vname">动作4</div></div>
+      <div class="video-card" data-index="4"><video src="动作5.mp4" muted playsinline></video><div class="vname">动作5</div></div>
+      <div class="video-card" data-index="5"><video src="动作6.mp4" muted playsinline></video><div class="vname">动作6</div></div>
+    </div>
+
+    <div class="bottom-bar center" id="startBar" style="flex-direction:column; align-items:center; display:none;">
+      <button class="btn-primary" id="startBtn">开始</button>
+      <span style="font-size:12px; color:rgba(240,230,210,0.5); margin-top:6px;">开始随机抽取三个素材</span>
+    </div>
+    <div id="actionBar" style="display:none;">
+      <div style="display:flex; flex-direction:column; gap:40px; align-items:flex-start;">
+        <button class="btn-ghost" id="creativeBtn">开始编舞</button>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="btn-ghost" id="musicBtn">选取音乐</button>
+          <input type="file" id="musicFile" accept="audio/*" style="display:none;">
+          <div id="musicControl" style="display:none; padding:8px 12px; background:rgba(15,14,14,0.95); border:1px solid rgba(201,169,110,0.3); border-radius:8px; white-space:nowrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button class="pause-btn show" id="musicPauseBtn" title="暂停音乐"></button>
+              <input type="range" id="musicProgress" min="0" max="100" value="0" style="width:120px; accent-color:#c9a96e;">
+              <span id="musicTime" style="font-size:12px; color:rgba(240,230,210,0.7); width:40px;">0:00</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="btn-ghost" id="loopBtn">循环播放</button>
+          <button class="pause-btn" id="pauseBtn" title="暂停"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="skin">
+  <div class="container">
+    <div class="page-title">数字人皮肤</div>
+    <div class="empty-state">暂无内容</div>
+  </div>
+</section>
+
+<section class="page" id="creative">
+  <div class="container">
+    <div class="page-title">创意舞动</div>
+    <div class="selected-strip" id="selectedActions"></div>
+    <div class="avatar-section" id="avatarSection" style="cursor:pointer;">
+      <div style="font-size:14px; color:rgba(240,230,210,0.7); margin-bottom:10px;">选择数字人</div>
+      <img id="avatarImg" src="" alt="数字人" style="display:none; max-width:180px; border-radius:8px; margin-bottom:10px;">
+      <div id="avatarPlaceholder" style="padding:30px; border:1px dashed rgba(201,169,110,0.4); border-radius:8px; color:rgba(240,230,210,0.5);">点击上传数字人图片</div>
+      <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
+    </div>
+    <div class="bottom-bar">
+      <button class="btn-primary" id="createBtn">编创</button>
+    </div>
+    <div id="videoWrap" style="display:none; text-align:center; margin-top:20px;">
+      <video id="resultVideo" src="视频5.mp4" controls playsinline style="max-width:100%; border-radius:8px;"></video>
+    </div>
+    <div class="back-bar">
+      <button class="btn-ghost" id="backBtn">返回</button>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="profile">
+  <div class="container">
+    <div class="page-title">我的</div>
+    <div style="text-align:center; padding:60px 20px;">
+      <div style="font-size:16px; color:#d4c5a9; margin-bottom:8px;">网站创造者 & 所有人</div>
+      <div style="font-size:24px; color:#c9a96e; font-weight:700;">薛歆璐</div>
+    </div>
+  </div>
+</section>
+
+<audio id="bgMusic" src="音频.mp3" loop />
+
+<script>
+var selectedActions = [0, 2, 5];
+var isRolling = false;
+
+function switchPage(pageName) {
+  document.querySelectorAll('.page').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  document.getElementById(pageName).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(function(a) {
+    a.classList.remove('active');
+  });
+  document.querySelector('.nav-links a[data-page="' + pageName + '"]').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll('.nav-links a').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    switchPage(a.dataset.page);
+  });
+});
+
+document.getElementById('enterBtn').addEventListener('click', function() {
+  for (var i = 0; i < 30; i++) {
+    setTimeout(function() {
+      var b = document.createElement('div');
+      b.className = 'butterfly';
+      var startX = window.innerWidth / 2 + (Math.random() - 0.5) * 300;
+      var startY = window.innerHeight / 2 + (Math.random() - 0.5) * 100;
+      b.style.left = startX + 'px';
+      b.style.top = startY + 'px';
+      b.style.setProperty('--tx', (Math.random() - 0.5) * 400 + 'px');
+      document.body.appendChild(b);
+      setTimeout(function() { b.remove(); }, 2000);
+    }, i * 40);
+  }
+  
+  setTimeout(function() {
+    switchPage('assets');
+  }, 1200);
+});
+
+var confirmBtn = document.getElementById('confirmBtn');
+var filterType = document.getElementById('filterType');
+var filterTheme = document.getElementById('filterTheme');
+var filterAction = document.getElementById('filterAction');
+var videoGrid = document.getElementById('videoGrid');
+var startBar = document.getElementById('startBar');
+
+function showVideos() {
+  videoGrid.style.display = 'grid';
+  startBar.style.display = 'flex';
+}
+
+function checkFilter() {
+  confirmBtn.disabled = !(filterType.value === '摆手舞' && filterTheme.value === '劳作' && filterAction.value === '提炼加工动作');
+}
+filterType.addEventListener('change', checkFilter);
+filterTheme.addEventListener('change', checkFilter);
+filterAction.addEventListener('change', checkFilter);
+
+// 搜索框监听
+document.querySelector('.search-box input').addEventListener('input', function(e) {
+  if (e.target.value.includes('摆手舞') || e.target.value.includes('劳作') || e.target.value.includes('提炼加工动作')) {
+    filterType.value = '摆手舞';
+    filterTheme.value = '劳作';
+    filterAction.value = '提炼加工动作';
+    showVideos();
+  }
+});
+
+confirmBtn.addEventListener('click', function() {
+  if (filterType.value === '摆手舞' && filterTheme.value === '劳作' && filterAction.value === '提炼加工动作') {
+    showVideos();
+  }
+});
+
+document.getElementById('videoGrid').addEventListener('click', function(e) {
+  var card = e.target.closest('.video-card');
+  if (card && !isRolling) {
+    var video = card.querySelector('video');
+    openOverlay(video.src);
+  }
+});
+
+function openOverlay(src) {
+  var ov = document.getElementById('videoOverlay');
+  var v = document.getElementById('overlayVideo');
+  v.src = src;
+  ov.classList.add('show');
+  v.play();
+}
+
+function closeOverlay() {
+  var ov = document.getElementById('videoOverlay');
+  var v = document.getElementById('overlayVideo');
+  v.pause();
+  v.src = '';
+  ov.classList.remove('show');
+}
+
+document.getElementById('startBtn').addEventListener('click', function() {
+  if (isRolling) return;
+  isRolling = true;
+  var cards = document.querySelectorAll('#videoGrid .video-card');
+  var count = 0;
+  var lastIdx = -1;
+  var interval = setInterval(function() {
+    if (lastIdx >= 0) cards[lastIdx].classList.remove('active');
+    lastIdx = Math.floor(Math.random() * cards.length);
+    cards[lastIdx].classList.add('active');
+    count++;
+    if (count >= 24) {
+      clearInterval(interval);
+      cards.forEach(function(c, i) {
+        c.classList.toggle('active', selectedActions.includes(i));
+      });
+      document.getElementById('actionBar').style.display = 'flex';
+      isRolling = false;
+      updateCreativeStrip();
+    }
+  }, 120);
+});
+
+function updateCreativeStrip() {
+  var wrap = document.getElementById('selectedActions');
+  wrap.innerHTML = '';
+  var names = ['动作1', '动作2', '动作3', '动作4', '动作5', '动作6'];
+  var srcs = ['动作1.mp4', '动作2.mp4', '动作3.mp4', '动作4.mp4', '动作5.mp4', '动作6.mp4'];
+  selectedActions.forEach(function(idx) {
+    var card = document.createElement('div');
+    card.className = 'video-card';
+    card.innerHTML = '<video src="' + srcs[idx] + '" muted playsinline></video><div class="vname">' + names[idx] + '</div>';
+    card.addEventListener('click', function() { openOverlay(srcs[idx]); });
+    wrap.appendChild(card);
+  });
+}
+
+document.getElementById('loopBtn').addEventListener('click', function() {
+  var cards = document.querySelectorAll('#videoGrid .video-card');
+  selectedActions.forEach(function(idx) {
+    var v = cards[idx].querySelector('video');
+    v.loop = true;
+    v.play();
+  });
+  document.getElementById('pauseBtn').style.display = 'flex';
+});
+
+document.getElementById('pauseBtn').addEventListener('click', function() {
+  var cards = document.querySelectorAll('#videoGrid .video-card');
+  selectedActions.forEach(function(idx) {
+    var v = cards[idx].querySelector('video');
+    v.pause();
+  });
+  document.getElementById('pauseBtn').style.display = 'none';
+});
+
+var bgMusic = document.getElementById('bgMusic');
+var musicOn = false;
+var musicControl = document.getElementById('musicControl');
+var musicProgress = document.getElementById('musicProgress');
+var musicTime = document.getElementById('musicTime');
+var musicPauseBtn = document.getElementById('musicPauseBtn');
+
+function formatTime(seconds) {
+  var mins = Math.floor(seconds / 60);
+  var secs = Math.floor(seconds % 60);
+  return mins + ':' + (secs < 10 ? '0' : '') + secs;
+}
+
+bgMusic.addEventListener('timeupdate', function() {
+  if (bgMusic.duration) {
+    var progress = (bgMusic.currentTime / bgMusic.duration) * 100;
+    musicProgress.value = progress;
+    musicTime.textContent = formatTime(bgMusic.currentTime);
+  }
+});
+
+bgMusic.addEventListener('loadedmetadata', function() {
+  musicProgress.max = 100;
+});
+
+musicProgress.addEventListener('input', function() {
+  if (bgMusic.duration) {
+    bgMusic.currentTime = (musicProgress.value / 100) * bgMusic.duration;
+  }
+});
+
+document.getElementById('musicBtn').addEventListener('click', function() {
+  document.getElementById('musicFile').click();
+});
+
+document.getElementById('musicFile').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (file) {
+    var url = URL.createObjectURL(file);
+    bgMusic.src = url;
+    bgMusic.loop = true;
+    bgMusic.play();
+    musicOn = true;
+    musicControl.style.display = 'block';
+    musicPauseBtn.classList.add('show');
+  }
+});
+
+musicPauseBtn.addEventListener('click', function() {
+  if (bgMusic.paused) {
+    bgMusic.play();
+  } else {
+    bgMusic.pause();
+  }
+});
+
+document.getElementById('creativeBtn').addEventListener('click', function() {
+  switchPage('creative');
+});
+
+document.getElementById('avatarSection').addEventListener('click', function() {
+  document.getElementById('avatarUpload').click();
+});
+
+document.getElementById('avatarUpload').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (file) {
+    var url = URL.createObjectURL(file);
+    var img = document.getElementById('avatarImg');
+    img.src = url;
+    img.style.display = 'block';
+    document.getElementById('avatarPlaceholder').style.display = 'none';
+  }
+});
+
+document.getElementById('createBtn').addEventListener('click', function() {
+  var overlay = document.getElementById('progressOverlay');
+  var bar = document.getElementById('progressBar');
+  var text = document.getElementById('progressText');
+  overlay.classList.add('show');
+  var p = 0;
+  var timer = setInterval(function() {
+    p += Math.floor(Math.random() * 8) + 2;
+    if (p >= 100) p = 100;
+    bar.style.width = p + '%';
+    text.textContent = p + '%';
+    if (p === 100) {
+      clearInterval(timer);
+      setTimeout(function() {
+        overlay.classList.remove('show');
+        document.getElementById('videoWrap').style.display = 'block';
+        setTimeout(function() {
+          document.getElementById('resultVideo').play();
+        }, 2000);
+      }, 400);
+    }
+  }, 180);
+});
+
+document.getElementById('backBtn').addEventListener('click', function() {
+  switchPage('assets');
+  document.querySelectorAll('#videoGrid .video-card').forEach(function(card, idx) {
+    card.style.display = selectedActions.includes(idx) ? 'block' : 'none';
+  });
+});
+
+updateCreativeStrip();
+</script>
+</body>
+</html>
